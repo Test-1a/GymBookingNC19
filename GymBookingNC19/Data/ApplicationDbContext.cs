@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using GymBookingNC19.Core.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymBookingNC19.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    //Här sätter vi ApplicationUser, IdentityRole samt att vi använder oss av string som id
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -19,9 +21,10 @@ namespace GymBookingNC19.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            //Always first
+            //Körs alltid först annars skrivs vår egen konfiguration över av default inställningarna i base 
             base.OnModelCreating(builder);
 
+            //Definerar upp en kompositnyckel i kopplingstabellen
             builder.Entity<ApplicationUserGymClass>()
                 .HasKey(k => new 
                 { 

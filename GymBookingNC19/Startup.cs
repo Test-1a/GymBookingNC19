@@ -12,6 +12,7 @@ using GymBookingNC19.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using GymBookingNC19.Core.Models;
 
 namespace GymBookingNC19
 {
@@ -31,7 +32,11 @@ namespace GymBookingNC19
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            //Konfigurerar att vi vill använda oss av ApplicationUser som extendar IdentityUser
+            //Här konfigurerar vi även att vi vill använda oss av default IdentityRole
+            //Vi behöver även ändra i ApplicationDbContext
+            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddControllersWithViews();

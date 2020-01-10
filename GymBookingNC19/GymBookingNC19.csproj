@@ -5,6 +5,11 @@
     <UserSecretsId>aspnet-GymBookingNC19-D5EBBE33-D9E0-4D1C-8B69-3D47104A1964</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Data\Migrations\20200110135623_ApplicationUser.cs" />
+    <Compile Remove="Data\Migrations\20200110135623_ApplicationUser.Designer.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.0.0" />
