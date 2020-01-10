@@ -7,22 +7,66 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GymBookingNC19.Core.Models;
 using GymBookingNC19.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace GymBookingNC19.Controllers
 {
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public GymClassesController(ApplicationDbContext context)
+        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            this.userManager = userManager;
         }
 
         // GET: GymClasses
         public async Task<IActionResult> Index()
         {
             return View(await _context.GymClasses.ToListAsync());
+        }
+
+        public async Task<IActionResult> BookingToogle(int? id)
+        {
+            if (id == null) return NotFound();
+
+            //Hämta den inloggade användarens id
+           // var userId = _context.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
+            var userId = userManager.GetUserId(User);
+
+            //Hämta aktuellt gympass
+            var currentGymClass = await _context.GymClasses
+                .Include(a => a.AttendingMembers)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            //Är den aktuella inloggade användaren bokad på passet?
+            var attending = currentGymClass.AttendingMembers
+                .FirstOrDefault(u => u.ApplicationUserId == userId);
+
+            //Om inte, boka användaren på passet
+            if(attending == null)
+            {
+                var book = new ApplicationUserGymClass
+                {
+                    ApplicationUserId = userId,
+                    GymClassId = currentGymClass.Id
+                };
+
+                _context.Add(book);
+                _context.SaveChanges();
+            }
+
+            //Annars avboka
+            else
+            {
+                _context.ApplicationUserGymClasses.Remove(attending);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction(nameof(Index));
+
         }
 
         // GET: GymClasses/Details/5
