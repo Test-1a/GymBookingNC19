@@ -25,7 +25,12 @@ namespace GymBookingNC19.Controllers
         // GET: GymClasses
         public async Task<IActionResult> Index()
         {
-            return View(await _context.GymClasses.ToListAsync());
+            var model = await _context.GymClasses
+                .Include(g => g.AttendingMembers)
+                .ThenInclude(a => a.ApplicationUser)
+                .ToListAsync();
+
+            return View(model);
         }
 
         public async Task<IActionResult> BookingToogle(int? id)
@@ -54,7 +59,7 @@ namespace GymBookingNC19.Controllers
                     GymClassId = currentGymClass.Id
                 };
 
-                _context.Add(book);
+                _context.ApplicationUserGymClasses.Add(book);
                 _context.SaveChanges();
             }
 
