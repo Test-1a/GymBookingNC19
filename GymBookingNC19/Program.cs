@@ -37,7 +37,7 @@ namespace GymBookingNC19
                 }
                 catch (Exception ex)
                 {
-                    var logger
+                    
                    
                 }
 
