@@ -77,9 +77,17 @@ namespace GymBookingNC19.Areas.Identity.Pages.Account
             {
                 var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user, Input.Password);
+
+
                 if (result.Succeeded)
                 {
+
                     _logger.LogInformation("User created a new account with password.");
+
+                    //Add role to user
+                    var resultAddRole = await _userManager.AddToRoleAsync(user, "Member");
+
+                    //Todo: act on not succeeded
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
