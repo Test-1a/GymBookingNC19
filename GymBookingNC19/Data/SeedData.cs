@@ -43,7 +43,8 @@ namespace GymBookingNC19.Data
                     var foundUser = await userManager.FindByEmailAsync(email);
                     if (foundUser != null) continue;
 
-                   var user = new ApplicationUser { UserName = email, Email = email };
+                   var user = new ApplicationUser { UserName = email, Email = email, FirstName = "Admin", LastName ="Gym", TimeOfRegistration = DateTime.Now };
+
                    var addUserResult = await userManager.CreateAsync(user, adminPW);
 
                     if (!addUserResult.Succeeded)
