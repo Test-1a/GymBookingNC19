@@ -37,14 +37,11 @@ namespace GymBookingNC19
                 }
                 catch (Exception ex)
                 {
-                    
-                   
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex.Message, "Seed Fail");
                 }
-
-                
-
             }  
-                
+            
             host.Run();
         }
 

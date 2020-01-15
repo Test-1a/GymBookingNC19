@@ -35,10 +35,16 @@
             @Html.DisplayFor(modelItem => gymClass.Description)
         </td>
         <td>
-            <a asp-action="Edit" asp-route-id="@gymClass.Id">Edit</a> |
-            <a asp-action="Details" asp-route-id="@gymClass.Id">Details</a> |
-            <a asp-action="Delete" asp-route-id="@gymClass.Id">Delete</a> |
-            <a asp-action="BookingToogle" asp-route-id="@gymClass.Id">Book</a>
+            @if (User.Identity.IsAuthenticated)
+            {
+
+
+                <a asp-action="Edit" asp-route-id="@gymClass.Id">Edit</a> <span>|</span>
+                <a asp-action="Details" asp-route-id="@gymClass.Id">Details</a> <span>|</span>
+                <a asp-action="Delete" asp-route-id="@gymClass.Id">Delete</a> <span>|</span>
+                <a asp-action="BookingToogle" asp-route-id="@gymClass.Id"> Book </a>
+
+            }
         </td>
     </tr>
 }

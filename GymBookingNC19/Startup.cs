@@ -35,7 +35,7 @@ namespace GymBookingNC19
             //Konfigurerar att vi vill använda oss av ApplicationUser som extendar IdentityUser
             //Här konfigurerar vi även att vi vill använda oss av default IdentityRole
             //Vi behöver även ändra i ApplicationDbContext
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -70,7 +70,7 @@ namespace GymBookingNC19
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=GymClasses}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
         }

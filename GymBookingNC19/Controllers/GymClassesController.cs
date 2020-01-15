@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using GymBookingNC19.Core.Models;
 using GymBookingNC19.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymBookingNC19.Controllers
 {
+    [Authorize]
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,8 +25,14 @@ namespace GymBookingNC19.Controllers
         }
 
         // GET: GymClasses
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
+            //if (!User.Identity.IsAuthenticated)
+            //{
+            //    return View(await _context.GymClasses)
+            //}
+
             var model = await _context.GymClasses
                 .Include(g => g.AttendingMembers)
                 .ThenInclude(a => a.ApplicationUser)

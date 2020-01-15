@@ -36,7 +36,38 @@ namespace GymBookingNC19.Data
                     }
                 }
 
-                context.SaveChanges();
+                var adminEmails = new[] { "admin@gym.se" };
+
+                foreach (var email in adminEmails)
+                {
+                    var foundUser = await userManager.FindByEmailAsync(email);
+                    if (foundUser != null) continue;
+
+                   var user = new ApplicationUser { UserName = email, Email = email };
+                   var addUserResult = await userManager.CreateAsync(user, adminPW);
+
+                    if (!addUserResult.Succeeded)
+                    {
+                        throw new Exception(string.Join("\n", addUserResult.Errors));
+                    }
+
+                  
+                }
+
+                //Todo: refactor
+                var adminUser = await userManager.FindByEmailAsync(adminEmails[0]);
+                foreach (var role in roleNames)
+                {
+                    if (await userManager.IsInRoleAsync(adminUser, role)) continue;
+
+                    var addToRoleResult = await userManager.AddToRoleAsync(adminUser, role);
+
+                    if (!addToRoleResult.Succeeded)
+                    {
+                        throw new Exception(string.Join("\n", addToRoleResult.Errors));
+                    }
+                }
+
             }
         }
     }
