@@ -13,6 +13,7 @@ namespace GymBookingNC19.Core.Models
         public TimeSpan Duration { get; set; }
         public DateTime EndTime => StartDate + Duration;
         public string Description { get; set; }
+        public bool Deleted { get; set; }
 
         public ICollection<ApplicationUserGymClass> AttendingMembers { get; set; }
 

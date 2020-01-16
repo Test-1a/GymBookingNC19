@@ -29,42 +29,54 @@ namespace GymBookingNC19.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index(IndexViewModel vm = null)
         {
+            var model = new IndexViewModel();
 
             if (vm.History)
             {
-                var gym = await _context.GymClasses
-               .Include(g => g.AttendingMembers)
-               .ThenInclude(a => a.ApplicationUser)
-               .IgnoreQueryFilters()
-               .Where(g => g.StartDate < DateTime.Now)
-               .ToListAsync();
-
-                var model = new IndexViewModel { GymClasses = gym };
+                List<GymClass> gym = await GetHistoryAsync();
+                model = new IndexViewModel { GymClasses = gym };
                 return View(model);
             }
 
-            var gymclasses =  await _context.GymClasses
-                .Include(g => g.AttendingMembers)
-                .ThenInclude(a => a.ApplicationUser)
-              //  .FirstOrDefault(g => g.Id == 1)
-             //  .IgnoreQueryFilters()
-                .ToListAsync();
+            List<GymClass> gymclasses = await GetAllWithUsersAsync();
 
             var model2 = new IndexViewModel { GymClasses = gymclasses };
 
             return View(model2);
         }
 
-        [Authorize(Roles ="Member")]
-        public async Task<IActionResult> GetBookings()
+        private async Task<List<GymClass>> GetAllWithUsersAsync()
         {
-            var userId = userManager.GetUserId(User);
+            return await _context.GymClasses
+                .Include(g => g.AttendingMembers)
+                .ThenInclude(a => a.ApplicationUser)
+                .ToListAsync();
+        }
 
-            var model = await _context.ApplicationUserGymClasses
+        private async Task<List<GymClass>> GetHistoryAsync()
+        {
+            return await _context.GymClasses
+           .Include(g => g.AttendingMembers)
+           .ThenInclude(a => a.ApplicationUser)
+           .IgnoreQueryFilters()
+           .Where(g => g.StartDate < DateTime.Now)
+           .ToListAsync();
+        }
+
+        private async Task<List<GymClass>> GetAllBookingsAsync(string userId)
+        {
+            return await _context.ApplicationUserGymClasses
                 .Where(ag => ag.ApplicationUserId == userId)
                 .IgnoreQueryFilters()
                 .Select(ag => ag.GymClass)
                 .ToListAsync();
+        }
+
+        [Authorize(Roles ="Member")]
+        public async Task<IActionResult> GetBookings()
+        {
+            var userId = userManager.GetUserId(User);
+            List<GymClass> model = await GetAllBookingsAsync(userId);
 
             return View(model);
         }
@@ -76,21 +88,16 @@ namespace GymBookingNC19.Controllers
             if (id == null) return NotFound();
 
             //Hämta den inloggade användarens id
-           // var userId = _context.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
+            // var userId = _context.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
             var userId = userManager.GetUserId(User);
-
-            //Hämta aktuellt gympass
-            var currentGymClass = await _context.GymClasses
-                .IgnoreQueryFilters()
-                .Include(a => a.AttendingMembers)
-                .FirstOrDefaultAsync(g => g.Id == id);
+            GymClass currentGymClass = await GetWithMembersAsync(id);
 
             //Är den aktuella inloggade användaren bokad på passet?
             var attending = currentGymClass.AttendingMembers
                 .FirstOrDefault(u => u.ApplicationUserId == userId);
 
             //Om inte, boka användaren på passet
-            if(attending == null)
+            if (attending == null)
             {
                 var book = new ApplicationUserGymClass
                 {
@@ -111,6 +118,16 @@ namespace GymBookingNC19.Controllers
 
             return RedirectToAction(nameof(Index));
 
+        }
+
+        private async Task<GymClass> GetWithMembersAsync(int? id)
+        {
+
+            //Hämta aktuellt gympass
+            //Todo: Remove button in ui if pass is history!!!
+            return await _context.GymClasses
+                .Include(a => a.AttendingMembers)
+                .FirstOrDefaultAsync(g => g.Id == id);
         }
 
         // GET: GymClasses/Details/5
@@ -216,9 +233,8 @@ namespace GymBookingNC19.Controllers
             {
                 return NotFound();
             }
+            GymClass gymClass = await GetAsync(id);
 
-            var gymClass = await _context.GymClasses
-                .FirstOrDefaultAsync(m => m.Id == id);
             if (gymClass == null)
             {
                 return NotFound();
@@ -227,19 +243,31 @@ namespace GymBookingNC19.Controllers
             return View(gymClass);
         }
 
+        private async Task<GymClass> GetAsync(int? id)
+        {
+            return await _context.GymClasses
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
         // POST: GymClasses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var gymClass = await _context.GymClasses.FindAsync(id);
+            var gymClass = await GetAsync(id);
+
             _context.GymClasses.Remove(gymClass);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool GymClassExists(int id)
+        {
+            return GetAny(id);
+        }
+
+        private bool GetAny(int id)
         {
             return _context.GymClasses.Any(e => e.Id == id);
         }
