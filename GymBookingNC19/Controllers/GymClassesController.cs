@@ -9,6 +9,7 @@ using GymBookingNC19.Core.Models;
 using GymBookingNC19.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using GymBookingNC19.Core.ViewModels;
 
 namespace GymBookingNC19.Controllers
 {
@@ -26,19 +27,31 @@ namespace GymBookingNC19.Controllers
 
         // GET: GymClasses
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(IndexViewModel vm = null)
         {
-            //if (!User.Identity.IsAuthenticated)
-            //{
-            //    return View(await _context.GymClasses)
-            //}
 
-            var model = await _context.GymClasses
+            if (vm.History)
+            {
+                var gym = await _context.GymClasses
+               .Include(g => g.AttendingMembers)
+               .ThenInclude(a => a.ApplicationUser)
+               .IgnoreQueryFilters()
+               .Where(g => g.StartDate < DateTime.Now)
+               .ToListAsync();
+
+                var model = new IndexViewModel { GymClasses = gym };
+                return View(model);
+            }
+
+            var gymclasses = await _context.GymClasses
                 .Include(g => g.AttendingMembers)
                 .ThenInclude(a => a.ApplicationUser)
+             //  .IgnoreQueryFilters()
                 .ToListAsync();
 
-            return View(model);
+            var model2 = new IndexViewModel { GymClasses = gymclasses };
+
+            return View(model2);
         }
 
         

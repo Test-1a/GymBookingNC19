@@ -1,4 +1,4 @@
-﻿@model IEnumerable<GymBookingNC19.Core.Models.GymClass>
+﻿@model IndexViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -13,19 +13,33 @@
     </p>
 }
 
+@if (User.IsInRole("Member"))
+{
+    <form asp-action="Index">
+        <div class="form-group row">
+               <div class="col-sm-2">History</div>
+                <div class="col-sm-10">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="History" onchange="this.form.submit()" />
+                    </div>
+                </div>
+        </div>
+    </form>
+}
+
 
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(model => model.Name)</th>
+            <th>@Html.DisplayNameFor(model => model.GymClasses.First().Name)</th>
             <th>
-                @Html.DisplayNameFor(model => model.StartDate)
+                @Html.DisplayNameFor(model => model.GymClasses.First().StartDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Duration)
+                @Html.DisplayNameFor(model => model.GymClasses.First().Duration)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.GymClasses.First().Description)
             </th>
             <th></th>
         </tr>

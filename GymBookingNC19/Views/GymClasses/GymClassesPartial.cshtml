@@ -1,11 +1,11 @@
-﻿@model IEnumerable<GymBookingNC19.Core.Models.GymClass>
+﻿@model IndexViewModel
 @inject UserManager<ApplicationUser>  userManager
 
 @{
     var userId = userManager.GetUserId(User);
 }
 
-@foreach (var gymClass in Model)
+@foreach (var gymClass in Model.GymClasses)
 {
     <tr>
         <td>

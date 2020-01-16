@@ -32,6 +32,8 @@ namespace GymBookingNC19.Data
                     k.ApplicationUserId,
                     k.GymClassId 
                 });
+
+            builder.Entity<GymClass>().HasQueryFilter(g => g.StartDate > DateTime.Now);
         }
     }
 }
