@@ -43,9 +43,10 @@ namespace GymBookingNC19.Controllers
                 return View(model);
             }
 
-            var gymclasses = await _context.GymClasses
+            var gymclasses =  await _context.GymClasses
                 .Include(g => g.AttendingMembers)
                 .ThenInclude(a => a.ApplicationUser)
+              //  .FirstOrDefault(g => g.Id == 1)
              //  .IgnoreQueryFilters()
                 .ToListAsync();
 
@@ -54,7 +55,21 @@ namespace GymBookingNC19.Controllers
             return View(model2);
         }
 
-        
+        [Authorize(Roles ="Member")]
+        public async Task<IActionResult> GetBookings()
+        {
+            var userId = userManager.GetUserId(User);
+
+            var model = await _context.ApplicationUserGymClasses
+                .Where(ag => ag.ApplicationUserId == userId)
+                .IgnoreQueryFilters()
+                .Select(ag => ag.GymClass)
+                .ToListAsync();
+
+            return View(model);
+        }
+
+
         [Authorize(Roles ="Member")]
         public async Task<IActionResult> BookingToogle(int? id)
         {
@@ -66,6 +81,7 @@ namespace GymBookingNC19.Controllers
 
             //Hämta aktuellt gympass
             var currentGymClass = await _context.GymClasses
+                .IgnoreQueryFilters()
                 .Include(a => a.AttendingMembers)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
