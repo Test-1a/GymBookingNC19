@@ -27,10 +27,10 @@ namespace GymBookingNC19.Data
 
             //Definerar upp en kompositnyckel i kopplingstabellen
             builder.Entity<ApplicationUserGymClass>()
-                .HasKey(k => new 
-                { 
+                .HasKey(k => new
+                {
                     k.ApplicationUserId,
-                    k.GymClassId 
+                    k.GymClassId
                 });
 
             builder.Entity<GymClass>().HasQueryFilter(g => g.StartDate > DateTime.Now);

@@ -11,21 +11,21 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using GymBookingNC19.Core.ViewModels;
 using GymBookingNC19.Data.Repositories;
+using GymBookingNC19.Core;
 
 namespace GymBookingNC19.Controllers
 {
     [Authorize]
     public class GymClassesController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private UnitOfWork unitOfWork;
+        
+        private IUnitOfWork unitOfWork;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public GymClassesController(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
         {
-            _context = context;
-            unitOfWork = new UnitOfWork(_context);
             this.userManager = userManager;
+            this.unitOfWork = unitOfWork;
         }
 
         // GET: GymClasses
@@ -36,12 +36,12 @@ namespace GymBookingNC19.Controllers
 
             if (vm.History)
             {
-                List<GymClass> gym = await unitOfWork.gymClassesRepository.GetHistoryAsync();
+                List<GymClass> gym = await unitOfWork.GymClasses.GetHistoryAsync();
                 model = new IndexViewModel { GymClasses = gym };
                 return View(model);
             }
 
-            List<GymClass> gymclasses = await unitOfWork.gymClassesRepository.GetAllWithUsersAsync();
+            List<GymClass> gymclasses = await unitOfWork.GymClasses.GetAllWithUsersAsync();
 
             var model2 = new IndexViewModel { GymClasses = gymclasses };
 
@@ -54,7 +54,7 @@ namespace GymBookingNC19.Controllers
         public async Task<IActionResult> GetBookings()
         {
             var userId = userManager.GetUserId(User);
-            List<GymClass> model = await unitOfWork.applicationUserGymClassRepository.GetAllBookingsAsync(userId);
+            List<GymClass> model = await unitOfWork.UserGymClasses.GetAllBookingsAsync(userId);
 
             return View(model);
         }
@@ -71,7 +71,7 @@ namespace GymBookingNC19.Controllers
 
             //Hämta aktuellt gympass
             //Todo: Remove button in ui if pass is history!!!
-            GymClass currentGymClass = await unitOfWork.gymClassesRepository.GetWithAttendingMembersAsync(id);
+            GymClass currentGymClass = await unitOfWork.GymClasses.GetWithAttendingMembersAsync(id);
 
             //Är den aktuella inloggade användaren bokad på passet?
             var attending = currentGymClass.AttendingMembers
@@ -86,14 +86,14 @@ namespace GymBookingNC19.Controllers
                     GymClassId = currentGymClass.Id
                 };
 
-                unitOfWork.applicationUserGymClassRepository.Add(book);
+                unitOfWork.UserGymClasses.Add(book);
                 await unitOfWork.CompleteAsync();
             }
 
             //Annars avboka
             else
             {
-                unitOfWork.applicationUserGymClassRepository.Remove(attending);
+                unitOfWork.UserGymClasses.Remove(attending);
                 await unitOfWork.CompleteAsync();
             }
 
@@ -111,7 +111,7 @@ namespace GymBookingNC19.Controllers
                 return NotFound();
             }
 
-            var gymClass = await unitOfWork.gymClassesRepository.GetAsync(id);
+            var gymClass = await unitOfWork.GymClasses.GetAsync(id);
 
             if (gymClass == null)
             {
@@ -138,7 +138,7 @@ namespace GymBookingNC19.Controllers
         {
             if (ModelState.IsValid)
             {
-                unitOfWork.gymClassesRepository.Add(gymClass);
+                unitOfWork.GymClasses.Add(gymClass);
                 await unitOfWork.CompleteAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -154,7 +154,7 @@ namespace GymBookingNC19.Controllers
                 return NotFound();
             }
 
-            var gymClass = await unitOfWork.gymClassesRepository.GetAsync(id);
+            var gymClass = await unitOfWork.GymClasses.GetAsync(id);
             if (gymClass == null)
             {
                 return NotFound();
@@ -179,7 +179,7 @@ namespace GymBookingNC19.Controllers
             {
                 try
                 {
-                    unitOfWork.gymClassesRepository.Update(gymClass);
+                    unitOfWork.GymClasses.Update(gymClass);
                     await unitOfWork.CompleteAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -206,7 +206,7 @@ namespace GymBookingNC19.Controllers
             {
                 return NotFound();
             }
-            GymClass gymClass = await unitOfWork.gymClassesRepository.GetAsync(id);
+            GymClass gymClass = await unitOfWork.GymClasses.GetAsync(id);
 
             if (gymClass == null)
             {
@@ -224,16 +224,16 @@ namespace GymBookingNC19.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var gymClass = await unitOfWork.gymClassesRepository.GetAsync(id);
+            var gymClass = await unitOfWork.GymClasses.GetAsync(id);
 
-            unitOfWork.gymClassesRepository.Remove(gymClass);
+            unitOfWork.GymClasses.Remove(gymClass);
             await unitOfWork.CompleteAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool GymClassExists(int id)
         {
-            return unitOfWork.gymClassesRepository.GetAny(id);
+            return unitOfWork.GymClasses.GetAny(id);
         }
 
        

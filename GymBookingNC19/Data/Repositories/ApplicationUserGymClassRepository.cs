@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GymBookingNC19.Core.Models;
+using GymBookingNC19.Core.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymBookingNC19.Data.Repositories
 {
-    public class ApplicationUserGymClassRepository
+    public class ApplicationUserGymClassRepository : IApplicationUserGymClassRepository
     {
         private readonly ApplicationDbContext context;
 
@@ -16,12 +17,12 @@ namespace GymBookingNC19.Data.Repositories
             this.context = context;
         }
 
-        internal void Add(ApplicationUserGymClass book)
+        public void Add(ApplicationUserGymClass book)
         {
             context.ApplicationUserGymClasses.Add(book);
         }
 
-        internal void Remove(ApplicationUserGymClass attending)
+        public void Remove(ApplicationUserGymClass attending)
         {
             context.ApplicationUserGymClasses.Remove(attending);
         }

@@ -1,4 +1,6 @@
-﻿using GymBookingNC19.Data.Repositories;
+﻿using GymBookingNC19.Core;
+using GymBookingNC19.Core.Repositories;
+using GymBookingNC19.Data.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace GymBookingNC19.Data
 {
-    public class UnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext context;
 
-        public GymClassesRepository gymClassesRepository { get; private set; }
-        public ApplicationUserGymClassRepository applicationUserGymClassRepository { get; private set; }
+        public IGymClassesRepository GymClasses { get; private set; }
+        public IApplicationUserGymClassRepository UserGymClasses { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             this.context = context;
-            gymClassesRepository = new GymClassesRepository(context);
-            applicationUserGymClassRepository = new ApplicationUserGymClassRepository(context);
+            GymClasses = new GymClassesRepository(context);
+            UserGymClasses = new ApplicationUserGymClassRepository(context);
         }
 
 
