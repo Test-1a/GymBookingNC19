@@ -52,13 +52,21 @@ namespace GymBookingNC19.Data.Repositories
            .ToListAsync();
         }
 
-        public async Task<List<GymClass>> GetAllBookingsAsync(string userId)
+      
+
+        internal void Add(GymClass gymClass)
         {
-            return await _context.ApplicationUserGymClasses
-                .Where(ag => ag.ApplicationUserId == userId)
-                .IgnoreQueryFilters()
-                .Select(ag => ag.GymClass)
-                .ToListAsync();
+            _context.Add(gymClass);
+        }
+
+        internal void Update(GymClass gymClass)
+        {
+            _context.Update(gymClass);
+        }
+
+        internal void Remove(GymClass gymClass)
+        {
+            _context.Remove(gymClass);
         }
     }
 }
