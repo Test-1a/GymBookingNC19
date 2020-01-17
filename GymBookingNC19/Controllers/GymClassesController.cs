@@ -10,6 +10,7 @@ using GymBookingNC19.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using GymBookingNC19.Core.ViewModels;
+using GymBookingNC19.Data.Repositories;
 
 namespace GymBookingNC19.Controllers
 {
@@ -17,11 +18,13 @@ namespace GymBookingNC19.Controllers
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private GymClassesRepository gymClassesRepository;
         private readonly UserManager<ApplicationUser> userManager;
 
         public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            gymClassesRepository = new GymClassesRepository(_context);
             this.userManager = userManager;
         }
 
@@ -33,7 +36,7 @@ namespace GymBookingNC19.Controllers
 
             if (vm.History)
             {
-                List<GymClass> gym = await GetHistoryAsync();
+                List<GymClass> gym = await gymClassesRepository.GetHistoryAsync();
                 model = new IndexViewModel { GymClasses = gym };
                 return View(model);
             }
@@ -45,32 +48,7 @@ namespace GymBookingNC19.Controllers
             return View(model2);
         }
 
-        private async Task<List<GymClass>> GetAllWithUsersAsync()
-        {
-            return await _context.GymClasses
-                .Include(g => g.AttendingMembers)
-                .ThenInclude(a => a.ApplicationUser)
-                .ToListAsync();
-        }
-
-        private async Task<List<GymClass>> GetHistoryAsync()
-        {
-            return await _context.GymClasses
-           .Include(g => g.AttendingMembers)
-           .ThenInclude(a => a.ApplicationUser)
-           .IgnoreQueryFilters()
-           .Where(g => g.StartDate < DateTime.Now)
-           .ToListAsync();
-        }
-
-        private async Task<List<GymClass>> GetAllBookingsAsync(string userId)
-        {
-            return await _context.ApplicationUserGymClasses
-                .Where(ag => ag.ApplicationUserId == userId)
-                .IgnoreQueryFilters()
-                .Select(ag => ag.GymClass)
-                .ToListAsync();
-        }
+      
 
         [Authorize(Roles ="Member")]
         public async Task<IActionResult> GetBookings()
@@ -90,7 +68,10 @@ namespace GymBookingNC19.Controllers
             //Hämta den inloggade användarens id
             // var userId = _context.Users.FirstOrDefault(u => u.UserName == User.Identity.Name);
             var userId = userManager.GetUserId(User);
-            GymClass currentGymClass = await GetWithMembersAsync(id);
+
+            //Hämta aktuellt gympass
+            //Todo: Remove button in ui if pass is history!!!
+            GymClass currentGymClass = await GetWithAttendingMembersAsync(id);
 
             //Är den aktuella inloggade användaren bokad på passet?
             var attending = currentGymClass.AttendingMembers
@@ -120,15 +101,7 @@ namespace GymBookingNC19.Controllers
 
         }
 
-        private async Task<GymClass> GetWithMembersAsync(int? id)
-        {
-
-            //Hämta aktuellt gympass
-            //Todo: Remove button in ui if pass is history!!!
-            return await _context.GymClasses
-                .Include(a => a.AttendingMembers)
-                .FirstOrDefaultAsync(g => g.Id == id);
-        }
+       
 
         // GET: GymClasses/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -243,11 +216,7 @@ namespace GymBookingNC19.Controllers
             return View(gymClass);
         }
 
-        private async Task<GymClass> GetAsync(int? id)
-        {
-            return await _context.GymClasses
-                .FirstOrDefaultAsync(m => m.Id == id);
-        }
+      
 
         // POST: GymClasses/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -267,9 +236,6 @@ namespace GymBookingNC19.Controllers
             return GetAny(id);
         }
 
-        private bool GetAny(int id)
-        {
-            return _context.GymClasses.Any(e => e.Id == id);
-        }
+       
     }
 }
