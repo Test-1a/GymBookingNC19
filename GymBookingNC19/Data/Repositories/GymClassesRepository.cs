@@ -69,5 +69,10 @@ namespace GymBookingNC19.Data.Repositories
         {
             _context.Remove(gymClass);
         }
+
+        public async Task<IEnumerable<GymClass>> GetAllAsync()
+        {
+            return await _context.GymClasses.ToListAsync();
+        }
     }
 }

@@ -34,6 +34,12 @@ namespace GymBookingNC19.Controllers
         {
             var model = new IndexViewModel();
 
+            if (!User.Identity.IsAuthenticated)
+            {
+                model.GymClasses = await unitOfWork.GymClasses.GetAllAsync();
+                return View(model);
+            }
+
             if (vm.History)
             {
                 List<GymClass> gym = await unitOfWork.GymClasses.GetHistoryAsync();
@@ -42,9 +48,7 @@ namespace GymBookingNC19.Controllers
             }
 
             List<GymClass> gymclasses = await unitOfWork.GymClasses.GetAllWithUsersAsync();
-
             var model2 = new IndexViewModel { GymClasses = gymclasses };
-
             return View(model2);
         }
 
