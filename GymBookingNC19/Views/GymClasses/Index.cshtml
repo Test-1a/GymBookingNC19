@@ -8,8 +8,12 @@
 
 @if (User.IsInRole("Admin"))
 {
-    <p>
-        <a asp-action="Create">Create New</a>
+    <p id="createform">
+        <a asp-action="Create"
+           data-ajax="true"
+           data-ajax-method="GET"
+           data-ajax-mode="replace"
+           data-ajax-update="#createform">Create New</a>
     </p>
 }
 

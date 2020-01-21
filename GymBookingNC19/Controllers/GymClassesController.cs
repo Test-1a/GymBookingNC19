@@ -129,7 +129,7 @@ namespace GymBookingNC19.Controllers
         [Authorize(Roles ="Admin")]
         public IActionResult Create()
         {
-            return View();
+            return PartialView("CreatePartial");
         }
 
         // POST: GymClasses/Create
