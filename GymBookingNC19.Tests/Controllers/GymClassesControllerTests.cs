@@ -2,6 +2,7 @@ using GymBookingNC19.Core;
 using GymBookingNC19.Core.Models;
 using GymBookingNC19.Core.ViewModels;
 using GymBookingNC19.Data.Repositories;
+using GymBookingNC19.Tests.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -36,20 +37,12 @@ namespace GymBookingNC19.Controllers
 
         }
 
-        private void SetUpUserIsAuthenticated(Controller controller, bool isAuthenticated)
-        {
-            var mockContext = new Mock<HttpContext>(MockBehavior.Default);
-            mockContext.SetupGet(httpCon => httpCon.User.Identity.IsAuthenticated).Returns(isAuthenticated);
-            controller.ControllerContext = new ControllerContext { HttpContext = mockContext.Object };
-        }
-
-
 
         [TestMethod]
         public async Task Index_ReturnsViewResult_ShouldPass()
         {
             //Arrange
-            SetUpUserIsAuthenticated(controller, true);
+            controller.SetUserIsAuthenticated(true);
             var vm = new IndexViewModel { History = false };
 
             //Act
@@ -67,7 +60,7 @@ namespace GymBookingNC19.Controllers
 
             repository.Setup(g => g.GetAllAsync()).ReturnsAsync(classes);
             var vm = new IndexViewModel { History = false };
-            SetUpUserIsAuthenticated(controller, false);
+            controller.SetUserIsAuthenticated(false);
 
             var viewResult = controller.Index(vm).Result as ViewResult;
 
