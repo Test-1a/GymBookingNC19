@@ -15,6 +15,10 @@
            data-ajax-mode="replace"
            data-ajax-update="#createform">Create New</a>
     </p>
+
+    <p>
+        <a asp-action="Create">Create New Old</a>
+    </p>
 }
 
 @if (User.IsInRole("Member"))
@@ -48,7 +52,7 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="gymclassesupdate">
         <partial name="GymClassesPartial" />
     </tbody>
 </table>

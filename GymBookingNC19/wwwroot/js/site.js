@@ -10,4 +10,9 @@ $(document).ready(function () {
 });
 
 
+function ClearForm() {
+    $(".clear").val("");
+};
+
+
 

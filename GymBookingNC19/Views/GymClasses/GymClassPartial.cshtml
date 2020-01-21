@@ -1,0 +1,70 @@
+﻿@model GymClass
+@inject UserManager<ApplicationUser>  userManager
+
+@{
+    var userId = userManager.GetUserId(User);
+}
+
+
+    <tr>
+        <td>
+            <p>
+                @Html.DisplayFor(modelItem => Model.Name)
+                @if (User.IsInRole("Member"))
+                {
+
+                    <a data-toggle="collapse" href="#memberlist-@Model.Id" role="button" aria-expanded="false">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                }
+            </p>
+
+            <div class="collapse" id="memberlist-@Model.Id">
+                @if (User.IsInRole("Member"))
+                {
+                    @foreach (var member in Model.AttendingMembers.Select(m => m.ApplicationUser))
+                    {
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h4 class="card-title">@member.Email</h4>
+                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor</p>
+                                <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-info"></i></a>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.StartDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.Duration)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.Description)
+        </td>
+        <td>
+            @if (User.IsInRole("Member"))
+            {
+
+                @if (Model.AttendingMembers.Any(a => a.ApplicationUserId == userId))
+                {
+                    <a asp-action="BookingToogle" asp-route-id="@Model.Id" class="btn btn-danger btn-sm"> Cancel </a>
+                }
+                else
+                {
+                    <a asp-action="BookingToogle" asp-route-id="@Model.Id" class="btn btn-success btn-sm"> Book </a>
+                }
+
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <span>|</span>
+                    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> <span>|</span>
+                    <a asp-action="Details" asp-route-id="@Model.Id">Details</a> <span>|</span>
+                    <a asp-action="Delete" asp-route-id="@Model.Id">Delete</a> <span>|</span>
+                }
+            }
+        </td>
+    </tr>

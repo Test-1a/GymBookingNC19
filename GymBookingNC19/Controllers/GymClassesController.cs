@@ -18,7 +18,7 @@ namespace GymBookingNC19.Controllers
     [Authorize]
     public class GymClassesController : Controller
     {
-        
+
         private IUnitOfWork unitOfWork;
         private readonly UserManager<ApplicationUser> userManager;
 
@@ -52,9 +52,9 @@ namespace GymBookingNC19.Controllers
             return View(model2);
         }
 
-      
 
-        [Authorize(Roles ="Member")]
+
+        [Authorize(Roles = "Member")]
         public async Task<IActionResult> GetBookings()
         {
             var userId = userManager.GetUserId(User);
@@ -64,7 +64,7 @@ namespace GymBookingNC19.Controllers
         }
 
 
-        [Authorize(Roles ="Member")]
+        [Authorize(Roles = "Member")]
         public async Task<IActionResult> BookingToogle(int? id)
         {
             if (id == null) return NotFound();
@@ -105,7 +105,7 @@ namespace GymBookingNC19.Controllers
 
         }
 
-       
+
 
         // GET: GymClasses/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -126,10 +126,12 @@ namespace GymBookingNC19.Controllers
         }
 
         // GET: GymClasses/Create
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
-            return PartialView("CreatePartial");
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return PartialView("CreatePartial");
+            return View();
         }
 
         // POST: GymClasses/Create
@@ -144,6 +146,19 @@ namespace GymBookingNC19.Controllers
             {
                 unitOfWork.GymClasses.Add(gymClass);
                 await unitOfWork.CompleteAsync();
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    ////Get all
+                    //var gymClasses = await unitOfWork.GymClasses.GetAllWithUsersAsync();
+                    //var vm = new IndexViewModel { GymClasses = gymClasses };
+                    //return PartialView("GymClassesPartial", vm); 
+
+                    ////Get one
+                    var model = await unitOfWork.GymClasses.GetWithAttendingMembersAsync(gymClass.Id);
+                    return PartialView("GymClassPartial", model);  
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             return View(gymClass);
@@ -220,7 +235,7 @@ namespace GymBookingNC19.Controllers
             return View(gymClass);
         }
 
-      
+
 
         // POST: GymClasses/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -240,6 +255,6 @@ namespace GymBookingNC19.Controllers
             return unitOfWork.GymClasses.GetAny(id);
         }
 
-       
+
     }
 }
