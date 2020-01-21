@@ -93,9 +93,21 @@ namespace GymBookingNC19.Controllers
         [TestMethod]    
         public void Create_ReturnsDefaultView_ShouldReturnNull()
         {
+            controller.SetAjaxRequest(false);
             var result = controller.Create() as ViewResult;
-            Assert.IsNull(result.ViewName);
 
+            Assert.IsNull(result.ViewName);
+        }
+
+        [TestMethod]
+        public void Create_ReturnsCreatePartielWhenAjax()
+        {
+            const string viewName = "CreatePartial";
+            controller.SetAjaxRequest(true);
+
+            var result = controller.Create() as PartialViewResult;
+
+            Assert.AreEqual(result.ViewName, viewName);
         }
 
         private List<GymClass> GetGymClassList()
